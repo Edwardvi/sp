@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>松潘县全域户外主题展厅 · 最终版展陈框架 · Songpan Outdoor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ============ 主题色(默认:🖋 墨水经典) ============
+       切换主题:从 references/themes.md 复制对应的 :root 块
+       整体替换这几行(--ink / --ink-rgb / --paper / --paper-rgb)
+       其他地方散落的 rgba() 都走 var(--ink-rgb) / var(--paper-rgb),无需逐处改 */
+    --ink:#1a2e1f;
+    --ink-rgb:26,46,31;
+    --paper:#f5f1e8;
+    --paper-rgb:245,241,232;
+    --paper-tint:#ece7da;
+    --ink-tint:#253d2c;
+
+    /* ============ 字体(跨主题固定) ============ */
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* ============ WebGL 双背景 ============ */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  /* ============ Deck 容器 + 翻页 ============ */
+  /* width: NSLIDES * 100vw，会在 JS 里动态矫正 */
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  /* 默认页：遮罩较厚，保证文字可读 */
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  /* Hero 页：遮罩大幅降低，让 WebGL 背景明显透出 */
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  /* Hero 页顶底微弱渐隐，保证 chrome/foot 区域可读 */
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  /* ============ Magazine chrome：顶部 meta + 底部 foot ============ */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .rule.v{width:1px;height:100%;margin:0}
+
+  /* ============ 字体规则 ============
+     · 衬线（Noto Serif SC / Playfair）：大标题、重点金句、数字
+     · 非衬线（Noto Sans SC）：正文描述、body、补充说明
+     · 等宽（IBM Plex Mono）：kicker、meta 小标签、foot 右侧
+  */
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.9vw;line-height:1.4;opacity:.85}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+
+  /* ============ 布局工具 ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
+
+  /* ============ Stat（数字矩阵） ============ */
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+
+  /* ============ Callout（引用框） ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
+
+  /* ============ Platform（平台卡） ============ */
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
+
+  /* ============ Rowline（表格行） ============ */
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
+
+  /* ============ Pillar（支柱卡片） ============ */
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+
+  /* ============ Signature / Highlight ============ */
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+
+  /* ============ Icons（Lucide via CDN） ============ */
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+
+  /* ============ 图片占位（虚线框，提示设计师位置） ============ */
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}
+  .img-slot.r-3x2{aspect-ratio:3/2}
+  .img-slot.r-1x1{aspect-ratio:1/1}
+
+  /* ============ 图片实填框（关键：固定高度 + 只裁底部） ============
+     重要约束：高度用内联 height:Nvh 精确控制，不要用 aspect-ratio（会撑破布局）
+     object-position:top center 保证严禁裁剪顶部和左右，只裁剪底部
+  */
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-img.fit-contain > img{object-fit:contain;object-position:center center}
+  .frame-img.r-16x9{aspect-ratio:16/9;max-height:64vh}
+  .frame-img.r-16x10{aspect-ratio:16/10;max-height:56vh}
+  .frame-img.r-4x3{aspect-ratio:4/3;max-height:56vh}
+  .frame-img.r-3x2{aspect-ratio:3/2;max-height:46vh}
+  .frame-img.r-3x4{aspect-ratio:3/4;max-height:60vh}
+  .frame-img.r-1x1{aspect-ratio:1/1;max-height:50vh}
+  .frame-img.h-16{height:16vh}
+  .frame-img.h-18{height:18vh}
+  .frame-img.h-22{height:22vh}
+  .frame-img.h-26{height:26vh}
+  .frame-img.h-28{height:28vh}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile > .frame-img{flex:0 0 auto}
+
+  /* ============ 导航 ============ */
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  /* ============================================================
+     ============ LAYOUTS API · 面向 agent 的类（v2）============
+     所有 layouts.md 中的骨架都基于下面这套命名。
+     如果你在 layouts.md 里看到某个类，它必须在下面有定义。
+     ============================================================ */
+
+  /* ---------- .frame：每页主内容容器 ---------- */
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  /* 当 .frame 同时加了 grid 类时，grid 的 display:grid 覆盖 flex */
+  .frame.grid-2-7-5,
+  .frame.grid-2-6-6,
+  .frame.grid-2-8-4,
+  .frame.grid-3-3,
+  .frame.grid-6{display:grid}
+
+  /* ---------- 标题层级（API 名称，衬线为主） ---------- */
+  .h-hero{
+    font-family:var(--serif-zh);
+    font-weight:900;
+    font-size:10vw;
+    line-height:.96;
+    letter-spacing:-.02em;
+  }
+  .h-xl{
+    font-family:var(--serif-zh);
+    font-weight:700;
+    font-size:6.2vw;
+    line-height:1.08;
+    letter-spacing:-.01em;
+  }
+  .h-sub{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:3.1vw;
+    line-height:1.25;
+    letter-spacing:0;
+    opacity:.7;
+  }
+  .h-md{
+    font-family:var(--serif-zh);
+    font-weight:600;
+    font-size:2.3vw;
+    line-height:1.3;
+  }
+  /* 英文标题专用（Playfair 衬线） */
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+
+  /* ---------- lead 引语 ---------- */
+  .lead{
+    font-family:var(--serif-zh);
+    font-weight:400;
+    font-size:1.75vw;
+    line-height:1.5;
+    opacity:.86;
+  }
+
+  /* ---------- meta-row 底部元数据 ---------- */
+  .meta-row{
+    display:flex;
+    gap:1.2em;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:max(12px,.92vw);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- stat-card（数据大字报用） ---------- */
+  .stat-card{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    align-items:flex-start;
+    padding-top:1.6vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.3);
+  }
+  .stat-card .stat-label{
+    font-family:var(--mono);
+    font-size:max(10px,.78vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.55;
+  }
+  .stat-card .stat-nb{
+    font-family:var(--serif-en);
+    font-weight:800;
+    font-size:5.8vw;
+    line-height:.9;
+    letter-spacing:-.03em;
+    font-feature-settings:"tnum";
+    margin-top:.4vh;
+  }
+  .stat-card .stat-nb .stat-unit{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:.38em;
+    letter-spacing:0;
+    opacity:.72;
+    margin-left:.14em;
+  }
+  .stat-card .stat-note{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(13px,1.05vw);
+    line-height:1.5;
+    opacity:.72;
+    margin-top:.6vh;
+  }
+  /* 当 stat-card 用于 grid-4（2x2），数字适度放大；若页面有标题+引文在上方，可内联 style 覆盖为更小值 */
+  .grid-4 .stat-card .stat-nb{font-size:5vw}
+  /* 当只有 3 个，字也可以稍大 */
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+
+  /* ---------- pipeline（流水线） ---------- */
+  .pipeline-section{
+    margin-top:4.4vh;
+    padding-top:2.8vh;
+    border-top:1px dashed rgba(127,127,127,.32);
+  }
+  .pipeline-section:first-of-type{
+    border-top:0;
+    padding-top:0;
+    margin-top:3vh;
+  }
+  .pipeline-label{
+    font-family:var(--mono);
+    font-size:max(11px,.85vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.62;
+    margin-bottom:2.2vh;
+  }
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1.2vw;
+  }
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    padding-top:1.4vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.35);
+  }
+  .step-nb{
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-weight:500;
+    font-size:1.15vw;
+    opacity:.45;
+  }
+  .step-title{
+    font-family:var(--sans-zh);
+    font-weight:700;
+    font-size:1.55vw;
+    letter-spacing:.01em;
+    line-height:1.2;
+  }
+  .step-desc{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(12px,.95vw);
+    line-height:1.45;
+    opacity:.72;
+  }
+
+  /* ---------- 网格（layouts.md 所用） ---------- */
+  /* 这些类独立挂到任何容器上都能生效，不依赖 .frame 复合选择器 */
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    gap:2.4vh 2vw;
+  }
+  /* grid-6 已在旧样式里定义为 3x2，这里仅补 align */
+
+  /* ---------- 图片 frame-img（layouts.md 主命名） ---------- */
+  /* 在旧样式里已定义，这里补 img-cap 命名别名与增强 */
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{
+    display:block;
+    margin-top:.8vh;
+    font-family:var(--mono);
+    font-size:max(10px,.8vw);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  /* callout src 命名别名 */
+  .callout-src{
+    display:block;
+    margin-top:1.6vh;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- chrome & foot 补位（layouts.md 简单写法） ---------- */
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  /* ============ 动效系统(Motion One 驱动) ============
+     所有 [data-anim] 元素默认隐藏,进入页面时由 JS 逐个揭示。
+     - cascade(默认):按 DOM 顺序 stagger 120ms 淡入 + y:16→0
+     - hero(hero 页自动):慢一点的 stagger 180ms
+     - quote(含 [data-anim="line"]):逐行 600ms 淡入
+     - directional(含 [data-anim="left|right"]):左→分隔线→右
+     - pipeline(data-animate="pipeline"):Space/→ 手动推进
+     Motion One 没加载成功时(CDN 断 + 本地丢),所有 [data-anim] 会兜底显示。
+  */
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,
+  body.low-power *::before,
+  body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],
+  body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  /* ---------- 响应式降级 ---------- */
+  @media (max-width:900px){
+    .display{font-size:16vw}
+    .display-zh{font-size:12vw}
+    .h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
+  }
+  /* ===== 版式保底：底部避开翻页导航；标题/正文按视口高度封顶，防止密集页溢出被裁 ===== */
+  .slide{ padding-top:5vh !important; padding-bottom:12vh !important; }
+  .frame{ padding-bottom:1.2vh; }
+  .h-hero{ font-size:min(8.4vw,14.5vh); }
+  .h-xl{ font-size:min(6.2vw,10.5vh); }
+  .h-sub{ font-size:min(2.6vw,5vh); }
+  .kicker{ margin-bottom:1.6vh; }
+  .lead{ font-size:min(1.5vw,2.9vh); }
+  .stat-card .stat-note{ font-size:max(12px,min(1.05vw,2.05vh)); }
+  .callout{ font-size:min(1.5vw,2.9vh); }
+  .step-desc{ font-size:max(12px,min(1vw,2vh)); }
+  .pipeline-section{ margin-top:2.6vh; padding-top:1.8vh; }
+  .pipeline-section:first-of-type{ margin-top:2vh; }
+  .pipeline-label{ margin-bottom:1.4vh; }
+  /* 网格按内容定高：原 flex:1/basis:0 会按"分配高度"压缩内容，导致溢出被 .frame 裁掉 */
+  .grid-3,.grid-4,.grid-6,.grid-9{ flex:0 0 auto !important; align-content:start !important; }</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `← → 翻页 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     每页模板参考 references/page-patterns.md
+     页面组件参考 references/components.md
+     ============================================================ -->
+
+<!-- ===================== 01 · 封面 ===================== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>松潘县全域户外主题展厅</div>
+    <div>Songpan</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Overall Narrative · 总体策展逻辑</div>
+    <h1 class="h-hero" style="font-size:7.6vw" data-anim>松潘县全域户外<br>主题展厅</h1>
+    <h2 class="h-sub" data-anim>最终版展陈框架</h2>
+    <p class="lead" style="max-width:62vw" data-anim>松潘如何把丰富的高山户外资源转化为安全、可控、可持续的户外产业？</p>
+    <div class="meta-row" data-anim>
+      <span>Songpan · Sichuan</span><span>·</span><span>4 Exhibitions</span><span>·</span><span>2026</span>
+    </div>
+  </div>
+  <div class="foot"><div>总体策展逻辑</div><div>— 2026 —</div></div>
+</section>
+
+<!-- ===================== 02 · 核心问题 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>总体策展逻辑</div>
+    <div>2 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>The Core Question</div>
+    <p class="lead" data-anim>整个展厅围绕一个核心问题展开：</p>
+    <h2 class="h-xl" style="font-size:min(4.6vw,9vh); line-height:1.25" data-anim>松潘如何把丰富的高山户外资源<br>转化为安全、可控、可持续的户外产业？</h2>
+  </div>
+  <div class="foot"><div>总体策展逻辑</div><div>2 / 50</div></div>
+</section>
+
+<!-- ===================== 03 · 四层递进 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>总体策展逻辑</div>
+    <div>3 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:6vh">
+    <div class="kicker" data-anim>Four Layers</div>
+    <h2 class="h-xl" data-anim>整个参观过程形成四层递进</h2>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="4">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">第一展区 · 看资源</div><div class="step-desc">为什么是松潘？</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">第二展区 · 看治理</div><div class="step-desc">丰富资源应该怎么管？</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">第三展区 · 看执行</div><div class="step-desc">治理规则怎么真正跑起来？</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">第四展区 · 看线路</div><div class="step-desc">治理能力最终落到哪些真实产品上？</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>总体策展逻辑</div><div>3 / 50</div></div>
+</section>
+
+<!-- ===================== 04 · 完整闭环 ===================== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>总体策展逻辑</div>
+    <div>4 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>The Loop</div>
+    <h2 class="h-xl" data-anim>最终形成完整闭环</h2>
+    <div class="pipeline-section" style="margin-top:2vh">
+      <div class="pipeline">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">资源</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">治理</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">数字执行</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">线路产品</div></div>
+        <div class="step"><div class="step-nb">05</div><div class="step-title">产业发展</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>总体策展逻辑</div><div>4 / 50</div></div>
+</section>
+
+<!-- ===================== 05 · 第一展区 幕封 ===================== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>第一展区</div>
+    <div>Act I · 5 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Zone I</div>
+    <h1 class="h-hero" style="font-size:8.2vw" data-anim>山水松潘<br>天然户外场</h1>
+    <p class="lead" style="max-width:64vw" data-anim>第一展区只回答一个问题：为什么是松潘？这里不再以传统景区介绍为主，而是以雪宝顶及周边山系资源集群为核心，展示松潘最具代表性的高原户外资源基础。</p>
+    <p class="body-zh" style="max-width:64vw" data-anim>核心不是“有哪些景点”，而是让参观者看到：一座雪山，带动一片山系，串联一组湖泊，连接多个村寨，最终形成完整的户外资源网络。</p>
+    <p class="body-zh" style="max-width:64vw; margin-top:1.6vh" data-anim>内容设计：全域鸟瞰地图 + 山体剖面垂直景观图 + 5维地理地貌</p>
+  </div>
+  <div class="foot"><div>第一展区 · 展区定位</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 06 · 展项01 一张图 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第一展区 · 展项01</div>
+    <div>6 / 50</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:6vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:3vh">
+      <div class="kicker" data-anim>One Map</div>
+      <h2 class="h-xl" data-anim>一张图认识松潘户外资源集群</h2>
+      <p class="lead" style="margin-top:2vh" data-anim>建议采用大型地形图、数字沙盘或三维山体模型。</p>
+      <p class="body-zh" data-anim>地图以：雪宝顶为中心，向周边展开雪峰、湖泊、山脊、峡谷、森林、草甸、村寨和交通节点。</p>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:1.6vh">
+      <div class="meta-row" data-anim><span>01</span><span>雪峰</span><span>02</span><span>湖泊</span></div>
+      <div class="meta-row" data-anim><span>03</span><span>山脊</span><span>04</span><span>峡谷</span></div>
+      <div class="meta-row" data-anim><span>05</span><span>森林</span><span>06</span><span>草甸</span></div>
+      <div class="meta-row" data-anim><span>07</span><span>村寨</span><span>08</span><span>交通节点</span></div>
+    </div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项01</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 07 · 全域松潘 · 从河谷到雪峰 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第一展区 · 地图讲解词</div>
+    <div>7 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Zone I · Overview</div>
+    <h2 class="h-xl" data-anim>从河谷到雪峰</h2>
+      <h3 class="h-md" style="margin:1.2vh 0 0" data-anim>一座县域，形成完整户外梯度</h3>
+    <p class="lead" style="margin-top:2.4vh; max-width:80vw" data-anim>松潘真正的户外价值，不来自单一景区，也不来自单一山峰。</p>
+    <p class="body-zh" style="margin-top:2.2vh; max-width:80vw" data-anim>在广阔县域内，雪山、森林、草原、湿地、峡谷、湖泊、河流、村寨与历史文化资源彼此连接，共同构成松潘发展全域户外产业的资源基础。</p>
+    <p class="body-zh" style="margin-top:2.2vh; max-width:80vw" data-anim>从河谷到雪峰，从森林到高山草甸，从村寨到5000米级山峰，不同海拔、不同地貌和不同文化空间，形成了层次丰富、类型多样的户外场景。</p>
+    <p class="body-zh" style="margin-top:2.2vh; max-width:80vw" data-anim>松潘具备的，不只是几处可以游览的自然资源，而是一套可以支撑轻徒步、高山穿越、专业登山、冰雪运动、自然研学和文化体验的全域户外资源体系。</p>
+    <div class="grid-3" style="margin-top:3.6vh">
+      <div class="stat-card" data-anim><div class="stat-label">01</div><h3 class="h3-zh" style="margin-top:1vh">全域有资源</h3></div>
+      <div class="stat-card" data-anim><div class="stat-label">02</div><h3 class="h3-zh" style="margin-top:1vh">处处有场景</h3></div>
+      <div class="stat-card" data-anim><div class="stat-label">03</div><h3 class="h3-zh" style="margin-top:1vh; font-size:1.4vw">不同空间承载不同户外可能</h3></div>
+    </div>
+  </div>
+  <div class="foot"><div>第一展区 · 全域松潘</div><div>7 / 50</div></div>
+</section>
+
+<!-- ===================== 08 · 展项02 从山脚到5588米 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第一展区 · 展项02</div>
+    <div>8 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4.6vh">
+    <div class="kicker" data-anim>Vertical Profile</div>
+    <h2 class="h-xl" data-anim>从山脚到5588米</h2>
+    <p class="lead" style="margin-top:1.6vh; max-width:74vw" data-anim>通过大型山体剖面展示雪宝顶区域完整的垂直户外谱系。</p>
+    <div style="margin-top:2.4vh">
+      <div class="rowline" style="padding:1.4vh 0"><div class="k">山脚村寨</div><div class="v">对应：集结 · 补给 · 文化体验 · 户外服务</div><div class="m">约3000—3500米</div></div>
+      <div class="rowline" style="padding:1.4vh 0"><div class="k">森林与河谷</div><div class="v">对应：轻徒步 · 溪谷体验 · 自然教育</div><div class="m">Forest</div></div>
+      <div class="rowline" style="padding:1.4vh 0"><div class="k">高山草甸与湖泊</div><div class="v">对应：湖泊徒步 · 露营 · 摄影 · 山地穿越</div><div class="m">约3500—4500米</div></div>
+      <div class="rowline" style="padding:1.4vh 0"><div class="k">垭口与高山山脊</div><div class="v">对应：进阶徒步 · 高海拔穿越 · 山地训练</div><div class="m">4000米以上</div></div>
+      <div class="rowline" style="padding:1.4vh 0"><div class="k">冰川与雪峰</div><div class="v">对应：专业登山 · 冰雪技术 · 高山探险</div><div class="m">5000米级</div></div>
+    </div>
+    <div class="meta-row" style="margin-top:2vh" data-anim><span>最终抵达</span><span>·</span><span>雪宝顶 5588m</span></div>
+    <div class="callout" style="margin-top:2vh" data-anim>从山脚村寨，到5000米级雪山，在同一山系，完成从轻户外到专业攀登的完整进阶<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项02</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 09 · 展项03 一座雪山·一组峰群 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第一展区 · 展项03</div>
+    <div>9 / 50</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:6vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:3vh">
+      <div class="kicker" data-anim>One Mountain, One Cluster</div>
+      <h2 class="h-xl" data-anim>一座雪山 · 一组峰群</h2>
+      <p class="lead" style="margin-top:2vh" data-anim>以雪宝顶主峰为中央。周边形成：</p>
+      <div class="meta-row" data-anim><span>都日峰</span><span>·</span><span>四根香峰</span></div>
+      <div class="meta-row" data-anim><span>塔格里峰</span><span>·</span><span>达拉梅巴峰</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:2.6vh">
+      <p class="body-zh" data-anim>雪宝顶并不是一座孤立的雪山。主峰与周边卫峰共同构成梯度分明的5000米级登山资源体系。不同山峰在海拔、冰雪环境、技术难度和攀登体验上各具特点，为从高海拔适应、技术进阶到专业挑战提供连续的成长空间。</p>
+      <div class="callout" data-anim>一座主峰，一组卫峰，一条登山进阶之路<div class="callout-src">Core</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项03</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 10 · 展项04 雪峰之下·高山海子 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第一展区 · 展项04</div>
+    <div>10 / 50</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:6vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:3vh">
+      <div class="kicker" data-anim>Under the Peak</div>
+      <h2 class="h-xl" data-anim>雪峰之下 · 高山海子</h2>
+      <p class="lead" style="margin-top:2vh" data-anim>集中展示：</p>
+      <div class="meta-row" data-anim><span>措尼长海</span><span>·</span><span>镜海</span><span>·</span><span>花海子</span></div>
+      <div class="meta-row" data-anim><span>心海</span><span>·</span><span>马槽海</span><span>·</span><span>船台海</span><span>·</span><span>邦达尔海</span></div>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:2.6vh">
+      <p class="body-zh" data-anim>雪山融水汇聚于高山之间，形成数量丰富、形态各异的高山湖泊。海子、草甸、牧场和远处雪峰，共同构成雪宝顶区域最具代表性的徒步景观。从短距离湖泊体验，到多日高海拔穿越，不同线路可以围绕同一组自然资源形成完全不同的产品。</p>
+      <div class="callout" data-anim>同一片山，可以有不同的走法<div class="callout-src">Core</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项04</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 11 · 展项05 云谷天脊·阿岭扎嘎 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第一展区 · 展项05</div>
+    <div>11 / 50</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:6vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:3vh">
+      <div class="kicker" data-anim>Valley & Ridge</div>
+      <h2 class="h-xl" data-anim>云谷天脊 · 阿岭扎嘎</h2>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:2.6vh">
+      <p class="body-zh" data-anim>从河谷出发，穿过森林与溪沟，随着海拔不断升高，高山草甸、岩峰和开阔山脊逐渐展开。站上海拔4000米左右的山脊，可以远眺雪宝顶及岷山群峰，在云海、日落和星空之间感受完全不同于传统景区的山地空间。</p>
+      <div class="callout" data-anim>沿谷入山，循脊见峰<div class="callout-src">Core</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项05</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 12 · 展项06 山谷与村寨 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第一展区 · 展项06</div>
+    <div>12 / 50</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:6vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:3vh">
+      <div class="kicker" data-anim>Trailhead Villages</div>
+      <h2 class="h-xl" data-anim>山谷与村寨 · 户外从这里出发</h2>
+      <p class="lead" style="margin-top:2vh" data-anim>将：上纳咪、若尔寨、郭学寨等村寨与相应山地资源连接起来。</p>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:2.6vh">
+      <p class="body-zh" data-anim>真正的户外目的地，不只是山上的风景。山脚村寨承担着集结、补给、向导、运输、住宿、救援和文化体验等多种功能。当村寨与线路形成联系，户外资源才开始真正转化为可以持续运营的产业。</p>
+      <div class="callout" data-anim>一条线路连接山上山下，也连接资源与生活<div class="callout-src">Core</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项06</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 13 · 展项07 一座山系·多种户外可能 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第一展区 · 展项07</div>
+    <div>13 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5.5vh">
+    <div class="kicker" data-anim>Many Possibilities</div>
+    <h2 class="h-xl" data-anim>一座山系 · 多种户外可能</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>围绕雪宝顶资源集群形成：</p>
+    <div class="grid-3" style="margin-top:3.8vh">
+      <div class="stat-card" data-anim><div class="stat-label">专业登山</div><div class="stat-note" style="margin-top:1vh">5000米级主峰及卫峰</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">高山穿越</div><div class="stat-note" style="margin-top:1vh">湖泊、垭口、山脊、荒野</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">高原轻徒步</div><div class="stat-note" style="margin-top:1vh">海子、草甸、雪山观景</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">山地露营</div><div class="stat-note" style="margin-top:1vh">星空、草甸、山脊</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">冰雪运动</div><div class="stat-note" style="margin-top:1vh">雪山、冰壁、高寒环境</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">自然研学</div><div class="stat-note" style="margin-top:1vh">冰川地貌、高山生态、村寨文化</div></div>
+    </div>
+    <div class="callout" style="margin-top:3.4vh" data-anim>不是一条线路，而是一整套户外可能<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第一展区 · 展项07</div><div>Zone I</div></div>
+</section>
+
+<!-- ===================== 14 · 第一展区转场 ===================== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>第一展区 → 第二展区</div>
+    <div>14 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:3.6vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Transition</div>
+    <h2 class="h-xl" data-anim>第一展区转场</h2>
+    <p class="lead" style="max-width:74vw" data-anim>随着户外活动从山脚进入雪山腹地，线路越来越长，海拔越来越高，参与者越来越多，风险也随之发生变化。短距离湖泊徒步和5000米级雪山攀登，显然不能采用同一套管理标准。</p>
+    <div class="meta-row" data-anim><span>不同的山</span><span>·</span><span>不同的路</span><span>·</span><span>不同的风险</span></div>
+    <div class="meta-row" data-anim><span>不同的准入</span><span>·</span><span>不同的规则</span><span>·</span><span>不同的保障</span></div>
+    <h2 class="h-sub" data-anim>好资源，需要好治理</h2>
+  </div>
+  <div class="foot"><div>第一展区 → 第二展区</div><div>Transition</div></div>
+</section>
+
+<!-- ===================== 15 · 第二展区 幕封 ===================== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>第二展区</div>
+    <div>Act II · 15 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Zone II</div>
+    <h1 class="h-hero" style="font-size:8.2vw" data-anim>全域治理<br>为开放建立边界</h1>
+    <p class="lead" style="max-width:64vw" data-anim>第二展区回答：这么丰富的户外资源应该怎么管？</p>
+    <p class="body-zh" style="max-width:64vw" data-anim>这一部分只讲政府顶层治理设计。不重复讲平台具体功能。</p>
+  </div>
+  <div class="foot"><div>第二展区 · 展区定位</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 16 · 展项01 一个治理总纲 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第二展区 · 展项01</div>
+    <div>16 / 50</div>
+  </div>
+  <div class="frame grid-2-6-6" style="padding-top:5.5vh">
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:3vh">
+      <div class="kicker" data-anim>Governance Framework</div>
+      <h2 class="h-xl" data-anim>一个治理总纲</h2>
+      <h3 class="h-md" style="margin-top:1vh" data-anim>从“管一个景区”，到“治理整个户外空间”</h3>
+      <p class="body-zh" style="margin-top:1vh" data-anim>随着徒步、登山、露营、骑行、漂流、冰雪等户外活动不断延伸，传统单一景区、单一项目式管理已经难以覆盖新的户外场景。</p>
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:2.4vh">
+      <p class="body-zh" data-anim>松潘由此构建：</p>
+      <div class="meta-row" data-anim><span>政府引导</span><span>·</span><span>数智赋能</span><span>·</span><span>企业运营</span><span>·</span><span>属地管理</span></div>
+      <p class="body-zh" data-anim>的全域户外治理体系。最终实现：</p>
+      <div class="meta-row" data-anim><span>安全可控</span><span>·</span><span>生态可控</span><span>·</span><span>全链可控</span></div>
+      <div class="callout" data-anim>不是限制户外，而是为开放建立边界<div class="callout-src">Core</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项01</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 17 · 控范围 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第二展区 · 展项02</div>
+    <div>17 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5.5vh">
+    <div class="kicker" data-anim>Scope Control</div>
+    <h2 class="h-xl" data-anim>控范围</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>回答：哪里能去？形成：</p>
+    <div class="grid-3" style="margin-top:3.4vh">
+      <div class="stat-card" data-anim><div class="stat-label">01</div><h3 class="h-md" style="margin-top:1vh">开放区</h3></div>
+      <div class="stat-card" data-anim><div class="stat-label">02</div><h3 class="h-md" style="margin-top:1vh">限制区</h3></div>
+      <div class="stat-card" data-anim><div class="stat-label">03</div><h3 class="h-md" style="margin-top:1vh">禁入区</h3></div>
+    </div>
+    <div class="pipeline-section">
+      <div class="pipeline-label">同时建立：动态调整机制</div>
+      <div class="pipeline" data-cols="4">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">开放</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">管制</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">熔断</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">恢复</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>空间不是永久开放，而是动态管理<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项02</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 18 · 控主体 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第二展区 · 展项02</div>
+    <div>18 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5.5vh">
+    <div class="kicker" data-anim>Subject Control</div>
+    <h2 class="h-xl" data-anim>控主体</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>回答：谁能组织，谁能带，谁能进入？形成三类主体：</p>
+    <div class="grid-3" style="margin-top:3.8vh">
+      <div class="stat-card" data-anim><div class="stat-label">实施主体</div><div class="stat-note" style="margin-top:1vh">运营企业 · 俱乐部 · 旅行社 · 马帮等</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">从业主体</div><div class="stat-note" style="margin-top:1vh">领队 · 向导 · 协作 · 教练 · 急救员</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">参与主体</div><div class="stat-note" style="margin-top:1vh">游客 · 户外运动爱好者</div></div>
+    </div>
+    <div class="callout" style="margin-top:4vh" data-anim>主体有资质，人员有身份，活动有责任<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项02</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 19 · 控体系 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第二展区 · 展项02</div>
+    <div>19 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5.5vh">
+    <div class="kicker" data-anim>Process Control</div>
+    <h2 class="h-xl" data-anim>控体系</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>回答：一次户外活动怎么全过程管理？形成：</p>
+    <div class="pipeline-section">
+      <div class="pipeline">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">线路评估</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">主体准入</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">活动报备</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">人员核验</div></div>
+        <div class="step"><div class="step-nb">05</div><div class="step-title">进山管理</div></div>
+        <div class="step"><div class="step-nb">06</div><div class="step-title">途中监管</div></div>
+        <div class="step"><div class="step-nb">07</div><div class="step-title">风险预警</div></div>
+        <div class="step"><div class="step-nb">08</div><div class="step-title">应急救援</div></div>
+        <div class="step"><div class="step-nb">09</div><div class="step-title">安全出山</div></div>
+        <div class="step"><div class="step-nb">10</div><div class="step-title">评价复盘</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>从事后处置，转向全过程治理<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项02</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 20 · 一张责任网络 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第二展区 · 展项03</div>
+    <div>20 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5.5vh">
+    <div class="kicker" data-anim>Responsibility Network</div>
+    <h2 class="h-xl" data-anim>一张责任网络</h2>
+    <p class="lead" style="margin-top:1.8vh; max-width:78vw" data-anim>回答：谁来负责？形成：行业指导、属地监管、企业运营、村级参与。</p>
+    <div class="grid-4" style="margin-top:4vh">
+      <div class="stat-card" data-anim><div class="stat-label">行业部门</div><div class="stat-note" style="margin-top:1vh">负责：标准、许可、行业监管</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">乡镇</div><div class="stat-note" style="margin-top:1vh">负责：巡查、发现问题、属地协调、吹哨上报</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">企业</div><div class="stat-note" style="margin-top:1vh">负责：活动组织、人员管理、安全保障、先期处置</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">村级</div><div class="stat-note" style="margin-top:1vh">参与：生态保护、基层监督、服务供给、共享收益</div></div>
+    </div>
+    <div class="callout" style="margin-top:4vh" data-anim>行业把方向，属地守底线，企业负责任，村级共参与<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项03</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 21 · 一条安全主线 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第二展区 · 展项04</div>
+    <div>21 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Safety Line</div>
+    <h2 class="h-xl" data-anim>一条安全主线</h2>
+    <h3 class="h-md" style="margin-top:1.4vh" data-anim>安全不从救援开始，而从风险识别开始。</h3>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="3">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">事前</div><div class="step-desc">线路评估 · 天气研判 · 人员资质 · 健康条件</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">事中</div><div class="step-desc">动态监测 · 节点管理 · 人员清点 · 风险预警</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">事后</div><div class="step-desc">事件记录 · 事故调查 · 一案三查 · 制度调整</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3.4vh" data-anim>风险早发现，预警早发布，险情早处置，事件可复盘<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项04</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 22 · 三级救援体系 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第二展区 · 展项05</div>
+    <div>22 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Three-Ring Rescue</div>
+    <h2 class="h-xl" data-anim>三级救援体系</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>中央：遇险人员。外围三圈：</p>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="3">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">第一圈</div><div class="step-desc">运营主体、向导、协作人员，负责先期处置。</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">第二圈</div><div class="step-desc">乡镇、网格员、管护员、民兵、马帮等，负责搜救接应。</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">第三圈</div><div class="step-desc">应急、公安、消防、卫健等，开展专业协同救援。</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3.4vh" data-anim>小险情就近处置，大险情协同攻坚<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项05</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 23 · 一条生态底线 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第二展区 · 展项06</div>
+    <div>23 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Ecological Baseline</div>
+    <h2 class="h-xl" data-anim>一条生态底线</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>实行：</p>
+    <div class="grid-6" style="margin-top:3.8vh">
+      <div class="stat-card" data-anim><div class="stat-label">01</div><div class="stat-note" style="margin-top:1vh; font-size:max(15px,1.2vw)">线路有评估</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">02</div><div class="stat-note" style="margin-top:1vh; font-size:max(15px,1.2vw)">容量有上限</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">03</div><div class="stat-note" style="margin-top:1vh; font-size:max(15px,1.2vw)">营地有标准</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">04</div><div class="stat-note" style="margin-top:1vh; font-size:max(15px,1.2vw)">垃圾有闭环</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">05</div><div class="stat-note" style="margin-top:1vh; font-size:max(15px,1.2vw)">用火有管控</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">06</div><div class="stat-note" style="margin-top:1vh; font-size:max(15px,1.2vw)">破坏有追责</div></div>
+    </div>
+    <div class="callout" style="margin-top:4vh" data-anim>开放有容量，进入有规则，离开无痕迹<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项06</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 24 · 一个治理中枢 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第二展区 · 展项07</div>
+    <div>24 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5.5vh">
+    <div class="kicker" data-anim>Command Center</div>
+    <h2 class="h-xl" data-anim>一个治理中枢</h2>
+    <p class="lead" style="margin-top:1.8vh; max-width:78vw" data-anim>引出：松潘县全域户外管理中心。承担：</p>
+    <div class="grid-3" style="margin-top:4vh">
+      <div class="stat-card" data-anim><div class="stat-label">管线路</div><div class="stat-note" style="margin-top:1vh">规划 · 勘测 · 申报 · 评估 · 复审 · 退出</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">管主体</div><div class="stat-note" style="margin-top:1vh">准入 · 评级 · 信用 · 监管</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">管能力</div><div class="stat-note" style="margin-top:1vh">培训 · 考核 · 复训 · 资质管理</div></div>
+    </div>
+    <div class="callout" style="margin-top:4vh" data-anim>多部门参与，一个体系统筹<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项07</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 25 · 一套市场机制 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第二展区 · 展项08</div>
+    <div>25 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Market Mechanism</div>
+    <h2 class="h-xl" data-anim>一套市场机制</h2>
+    <p class="lead" style="margin-top:1.8vh" data-anim>形成：</p>
+    <div class="grid-4" style="margin-top:3.4vh">
+      <div class="stat-card" data-anim><div class="stat-label">政府监管</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">市场运营</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">集体参与</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">群众受益</div></div>
+    </div>
+    <div class="pipeline-section">
+      <div class="pipeline-label">最终实现</div>
+      <div class="pipeline" data-cols="4">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">保护资源</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">发展产业</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">增加收益</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">反哺保护</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>让资源保护者，也成为产业受益者<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项08</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 26 · 一个数字底座 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第二展区 · 展项09</div>
+    <div>26 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Digital Foundation</div>
+    <h2 class="h-xl" data-anim>一个数字底座</h2>
+    <p class="lead" style="margin-top:1.8vh; max-width:84vw" data-anim>回答：这么复杂的治理体系，靠什么真正执行？通过智慧平台，把制度转化为：</p>
+    <div class="grid-3" style="margin-top:3.2vh">
+      <div class="stat-card" data-anim><div class="stat-label">Rules</div><h3 class="h-md" style="margin-top:1vh">系统规则</h3></div>
+      <div class="stat-card" data-anim><div class="stat-label">Flow</div><h3 class="h-md" style="margin-top:1vh">操作流程</h3></div>
+      <div class="stat-card" data-anim><div class="stat-label">Data</div><h3 class="h-md" style="margin-top:1vh">数据记录</h3></div>
+    </div>
+    <p class="body-zh" style="margin-top:3vh" data-anim>实现：</p>
+    <div class="meta-row" style="margin-top:1vh" data-anim>
+      <span>线路数字化</span><span>·</span><span>主体电子化</span><span>·</span><span>身份实名化</span><span>·</span><span>活动在线化</span>
+    </div>
+    <div class="meta-row" style="margin-top:1.2vh" data-anim>
+      <span>轨迹可视化</span><span>·</span><span>风险预警化</span><span>·</span><span>救援协同化</span>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>制度定规则，平台让规则执行 · 进入第三展区<div class="callout-src">Transition</div></div>
+  </div>
+  <div class="foot"><div>第二展区 · 展项09</div><div>Zone II</div></div>
+</section>
+
+<!-- ===================== 27 · 第三展区 幕封 ===================== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>第三展区</div>
+    <div>Act III · 27 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Zone III</div>
+    <h1 class="h-hero" style="font-size:8vw" data-anim>数智松潘<br>让治理真正跑起来</h1>
+    <p class="lead" style="max-width:60vw" data-anim>第三展区回答：第二展区的规则，到底怎么执行？</p>
+    <div class="meta-row" data-anim>
+      <span>1块总控大屏</span><span>·</span><span>1条真实团队流程</span><span>·</span><span>4个角色终端</span><span>·</span><span>1个救援指挥场景</span><span>·</span><span>1面持续迭代墙</span>
+    </div>
+  </div>
+  <div class="foot"><div>第三展区 · 展区定位</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 28 · 展项01 一块总控大屏 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第三展区 · 展项01</div>
+    <div>28 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Command Screen</div>
+    <h2 class="h-xl" data-anim>一块总控大屏</h2>
+    <h3 class="h-md" style="margin:1.2vh 0 2.4vh" data-anim>一张图 · 看全域</h3>
+    <p class="lead" style="margin-top:1vh; max-width:76vw" data-anim>以三维GIS地图为核心。展示：</p>
+    <div class="grid-4" style="margin-top:3.4vh">
+      <div class="stat-card" data-anim><div class="stat-label">资源</div><div class="stat-note" style="margin-top:1vh">线路 · 营地 · 卡口 · 危险点 · 无信号区</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">人员</div><div class="stat-note" style="margin-top:1vh">游客 · 团队 · 向导</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">救援</div><div class="stat-note" style="margin-top:1vh">马帮 · 医疗站 · AED · 无人机 · 救援力量</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">风险</div><div class="stat-note" style="margin-top:1vh">气象 · 偏航 · 超时 · SOS · 线路状态</div></div>
+    </div>
+    <div class="rowline" style="margin-top:3vh"><div class="k">辅助显示</div><div class="v">今日在山人数 · 今日发团数量 · 开放线路数量</div><div class="m">Live</div></div>
+    <div class="rowline"><div class="k">辅助显示</div><div class="v">当前向导数量 · 风险预警数量 · 安全出山人数</div><div class="m">Live</div></div>
+    <div class="callout" style="margin-top:3vh" data-anim>人在哪里 · 队伍在哪里 · 风险在哪里 · 救援力量在哪里，一张图，实时掌握<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项01</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 29 · 展项02 一支真实团队（第一~四步） ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第三展区 · 展项02</div>
+    <div>29 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>One Team</div>
+    <h2 class="h-xl" data-anim>一支真实团队</h2>
+    <p class="lead" style="margin-top:1.6vh" data-anim>建议选取：雪宝顶区域户外团队，作为贯穿第三展区的案例。</p>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="4">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">第一步 · 创建团期</div><div class="step-desc">俱乐部提交：线路、时间、人数。系统自动判断：线路是否开放、人数是否超限、向导配比是否达标、保险是否齐全、人员资格是否完整。不符合：系统直接拦截。</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">第二步 · 游客完成报备</div><div class="step-desc">完成：实名认证、健康申报、紧急联系人、安全培训、风险告知、保险核验。最终生成：松潘户外码。</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">第三步 · 扫码进山</div><div class="step-desc">卡口核验。系统更新：在山人数、团队状态、人员名单。</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">第四步 · 在途监管</div><div class="step-desc">向导执行：GPS打卡、拍照、人员清点、状态上报。系统持续记录：位置、速度、海拔、轨迹。</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:2.6vh" data-anim>把风险挡在出发之前<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项02</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 30 · 展项02 一支真实团队（第五~七步） ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第三展区 · 展项02</div>
+    <div>30 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>One Team</div>
+    <h2 class="h-xl" data-anim>一支真实团队</h2>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="3">
+        <div class="step"><div class="step-nb">05</div><div class="step-title">第五步 · 出现偏航</div><div class="step-desc">游客端提醒。向导端告警。管理端同步发现。</div></div>
+        <div class="step"><div class="step-nb">06</div><div class="step-title">第六步 · 节点超时</div><div class="step-desc">系统产生：失联预警工单。工作人员核实：网络问题？行程延迟？偏航？已经遇险？最终决定：解除预警，或升级险情。</div></div>
+        <div class="step"><div class="step-nb">07</div><div class="step-title">第七步 · 安全出山</div><div class="step-desc">通行码核销。更新在山人数。完成：活动归档、游客评价。</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:3.4vh" data-anim>一个异常，多端同时知道<div class="callout-src">Core</div></div>
+    <div class="callout" style="margin-top:2vh" data-anim>一次活动，一条完整责任链<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项02</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 31 · 展项03 四个角色终端 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第三展区 · 展项03</div>
+    <div>31 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Four Terminals</div>
+    <h2 class="h-xl" data-anim>四个角色终端</h2>
+    <div class="grid-4" style="margin-top:3.6vh">
+      <div class="stat-card" data-anim><div class="stat-label">政府端</div><h3 class="h3-zh" style="margin-top:1vh">看得见 · 管得住 · 调得动</h3><div class="stat-note" style="margin-top:1vh">全域GIS · 主体管理 · 活动监管 · 风险预警 · 救援调度 · 事件台账</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">游客端</div><h3 class="h3-zh" style="margin-top:1vh">知风险 · 守规则 · 有保障</h3><div class="stat-note" style="margin-top:1vh">线路查询 · 实名报备 · 户外码 · 离线地图 · 偏航提醒 · SOS</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">向导端</div><h3 class="h3-zh" style="margin-top:1vh">带好队 · 守好线 · 报好点</h3><div class="stat-note" style="margin-top:1vh">任务卡 · 游客核验 · 节点打卡 · 人员清点 · 险情上报 · 救援接单</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">俱乐部端</div><h3 class="h3-zh" style="margin-top:1vh">有资质 · 按规则 · 负责任</h3><div class="stat-note" style="margin-top:1vh">团期创建 · 人员配置 · 向导调度 · 配比核验 · 保险名单 · 团队状态</div></div>
+    </div>
+    <div class="callout" style="margin-top:3.6vh" data-anim>四个端，共用一套规则，围绕一次活动<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项03</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 32 · 展项04 一个救援指挥场景 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第三展区 · 展项04</div>
+    <div>32 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Rescue Scenario</div>
+    <h2 class="h-xl" data-anim>一个救援指挥场景</h2>
+    <p class="lead" style="margin-top:1.6vh; max-width:84vw" data-anim>模拟：游客突发严重高反。向导触发：SOS。管理端调阅：姓名、坐标、海拔、健康档案、历史轨迹、设备电量、联系人。随后启动：</p>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="3">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">第一圈</div><div class="step-desc">附近向导、协作力量</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">第二圈</div><div class="step-desc">乡镇、马帮、基层救援</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">第三圈</div><div class="step-desc">应急、公安、消防、医疗</div></div>
+      </div>
+    </div>
+    <div class="grid-2-6-6" style="margin-top:2.6vh">
+      <div class="callout" data-anim>一个求救信号，激活一张救援网络<div class="callout-src">Core</div></div>
+      <div class="callout" data-anim>无信号怎么办？公网失联 → 北斗等专业设备 → 定位 / 短报文 → 平台上屏 → 救援调度。<br><span style="opacity:.75">平台必须适应山，而不是让山适应平台。</span><div class="callout-src">Offline · Core</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项04</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 33 · 展项05 一次事件变成一次治理经验 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第三展区 · 展项05</div>
+    <div>33 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>From Event to Experience</div>
+    <h2 class="h-xl" data-anim>一次事件变成一次治理经验</h2>
+    <p class="lead" style="margin-top:1.8vh; max-width:84vw" data-anim>系统完整记录：发生时间、地点、人员、轨迹、响应过程、调用力量、处置结果。形成：救援事件台账。进一步开展：一案三查。</p>
+    <div class="grid-3" style="margin-top:3.6vh">
+      <div class="stat-card" data-anim><div class="stat-label">查范围</div><div class="stat-note" style="margin-top:1vh">线路划定有没有问题？</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">查主体</div><div class="stat-note" style="margin-top:1vh">责任有没有履行？</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">查体系</div><div class="stat-note" style="margin-top:1vh">响应有没有短板？</div></div>
+    </div>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="3">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">事故处理</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">数据沉淀</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">制度优化</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项05</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 34 · 展项06 一面持续迭代墙（三阶段+举例） ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第三展区 · 展项06</div>
+    <div>34 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Continuous Iteration</div>
+    <h2 class="h-xl" data-anim>一面持续迭代墙</h2>
+    <p class="lead" style="margin-top:1.6vh" data-anim>平台不是一次建成，而是在真实运行中持续更新。</p>
+    <div class="grid-3" style="margin-top:3.2vh">
+      <div class="stat-card" data-anim><div class="stat-label">第一阶段</div><div class="stat-note" style="margin-top:1vh">解决：谁进山、去哪条线、谁组织。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">第二阶段</div><div class="stat-note" style="margin-top:1vh">解决：在哪里、有没有风险、怎么救援。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">第三阶段</div><div class="stat-note" style="margin-top:1vh">解决：如何通过真实数据不断优化治理。</div></div>
+    </div>
+    <div class="grid-3" style="margin-top:2.6vh">
+      <div class="stat-card" data-anim><div class="stat-note">某路段持续偏航 → 调整线路、增设标识、优化打卡点。</div></div>
+      <div class="stat-card" data-anim><div class="stat-note">某线路游客集中 → 调整承载量、调整开放时间。</div></div>
+      <div class="stat-card" data-anim><div class="stat-note">某区域通信薄弱 → 增加北斗设备、补充通信节点、前置救援力量。</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项06</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 35 · 展项06 一面持续迭代墙（闭环+核心句） ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第三展区 · 展项06</div>
+    <div>35 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>The Loop</div>
+    <h2 class="h-xl" data-anim>一面持续迭代墙</h2>
+    <p class="lead" style="margin-top:1.6vh" data-anim>最终形成：</p>
+    <div class="pipeline-section">
+      <div class="pipeline">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">运行</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">发现问题</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">形成数据</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">分析复盘</div></div>
+        <div class="step"><div class="step-nb">05</div><div class="step-title">优化规则</div></div>
+        <div class="step"><div class="step-nb">06</div><div class="step-title">更新平台</div></div>
+        <div class="step"><div class="step-nb">07</div><div class="step-title">再运行</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:2.8vh" data-anim>制度指导平台，现场检验制度，数据推动更新<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第三展区 · 展项06</div><div>Zone III</div></div>
+</section>
+
+<!-- ===================== 36 · 第三展区转场 ===================== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>第三展区 → 第四展区</div>
+    <div>36 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>The Turn</div>
+    <h1 class="h-hero" style="font-size:6.6vw; line-height:1.16" data-anim>平台建设最终不是为了<br>展示一套软件</h1>
+    <p class="lead" style="max-width:62vw" data-anim>而是为了让真实的山、真实的线路和真实的户外活动能够被安全、有序地运营。因此：</p>
+    <h2 class="h-sub" data-anim>好治理，最终要落在真实线路上</h2>
+    <div class="meta-row" data-anim><span>进入第四展区</span></div>
+  </div>
+  <div class="foot"><div>转场</div><div>Transition</div></div>
+</section>
+
+<!-- ===================== 37 · 第四展区 幕封 ===================== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>第四展区</div>
+    <div>Act IV · 37 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:5vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Zone IV</div>
+    <h1 class="h-hero" style="font-size:8.2vw" data-anim>山河成线<br>户外松潘</h1>
+    <p class="lead" style="max-width:64vw" data-anim>回答：治理最终落在哪里？答案：落在一条条真实线路上。这一展区展示：资源如何变成线路，线路如何变成产品，产品如何在治理体系下持续运营。</p>
+  </div>
+  <div class="foot"><div>第四展区 · 展区定位</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 38 · 展项01 一张户外线路总图 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第四展区 · 展项01</div>
+    <div>38 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Route Map</div>
+    <h2 class="h-xl" data-anim>一张户外线路总图</h2>
+    <p class="lead" style="margin-top:1.6vh" data-anim>大型地图展示12条代表线路：</p>
+    <div class="grid-4" style="margin-top:3.2vh">
+      <div class="stat-card" data-anim><div class="stat-label">01</div><div class="stat-note" style="margin-top:1vh">岷山之巅 · 雪宝顶三峰攀登线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">02</div><div class="stat-note" style="margin-top:1vh">雪宝顶卫峰登山线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">03</div><div class="stat-note" style="margin-top:1vh">花海忘忧线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">04</div><div class="stat-note" style="margin-top:1vh">环土拨鼠峰线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">05</div><div class="stat-note" style="margin-top:1vh">忘忧·双湖</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">06</div><div class="stat-note" style="margin-top:1vh">大横断·七藏沟</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">07</div><div class="stat-note" style="margin-top:1vh">阿岭扎嘎·云谷天脊</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">08</div><div class="stat-note" style="margin-top:1vh">阿岭扎嘎高铁线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">09</div><div class="stat-note" style="margin-top:1vh">阿尼玛东穿越线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">10</div><div class="stat-note" style="margin-top:1vh">淘尼穿越线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">11</div><div class="stat-note" style="margin-top:1vh">观山阅海往返线</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">12</div><div class="stat-note" style="margin-top:1vh">雪宝顶环线</div></div>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>一套治理体系，管理一张真实线路网络<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项01</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 39 · 展项02 五种户外方式（第一/二类） ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第四展区 · 展项02</div>
+    <div>39 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Five Ways</div>
+    <h2 class="h-xl" data-anim>十二条线路 · 五种户外方式</h2>
+    <div class="grid-2-6-6" style="margin-top:3.4vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">第一类 · 向上</div>
+        <h3 class="h-md" style="margin-top:1vh">专业攀登</h3>
+        <div class="stat-note" style="margin-top:1.4vh">包括：雪宝顶三峰攀登线、雪宝顶卫峰登山线。<br>形成：5000米级雪山产品体系。从卫峰体验，到技术进阶，再到主峰挑战。</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">第二类 · 向深处</div>
+        <h3 class="h-md" style="margin-top:1vh">高山穿越</h3>
+        <div class="stat-note" style="margin-top:1.4vh">包括：大横断·七藏沟、花海忘忧线、阿尼玛东穿越线、淘尼穿越线。<br>关键词：荒野、湖泊、垭口、牧场、森林、多日穿越。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项02</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 40 · 展项02 五种户外方式（第三/四/五类） ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第四展区 · 展项02</div>
+    <div>40 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Five Ways</div>
+    <h2 class="h-xl" data-anim>十二条线路 · 五种户外方式</h2>
+    <div class="grid-3" style="margin-top:3.4vh">
+      <div class="stat-card" data-anim>
+        <div class="stat-label">第三类 · 向山脊</div>
+        <h3 class="h3-zh" style="margin-top:1vh">山地徒步</h3>
+        <div class="stat-note" style="margin-top:1.2vh">包括：阿岭扎嘎·云谷天脊、雪宝顶环线。<br>关键词：山脊、云海、雪山、森林、高山草甸。</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">第四类 · 向海子</div>
+        <h3 class="h3-zh" style="margin-top:1vh">高原轻徒步</h3>
+        <div class="stat-note" style="margin-top:1.2vh">包括：环土拨鼠峰线、忘忧·双湖、观山阅海往返线。<br>形成：从短距离观景，到一日徒步，再到两日高山湖泊体验 的产品梯度。</div>
+      </div>
+      <div class="stat-card" data-anim>
+        <div class="stat-label">第五类 · 从城市</div>
+        <h3 class="h3-zh" style="margin-top:1vh">直接进山</h3>
+        <div class="stat-note" style="margin-top:1.2vh">代表：阿岭扎嘎高铁线。<br>核心表达：下高铁，就徒步。将交通枢纽直接与山地户外空间连接。<br>核心价值：高铁改变高原户外可达性。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项02</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 41 · 展项03 一张产品矩阵 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第四展区 · 展项03</div>
+    <div>41 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Product Matrix</div>
+    <h2 class="h-xl" data-anim>十二条线路 · 一张产品矩阵</h2>
+    <table data-anim style="width:100%;margin-top:3vh;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,min(1.02vw,1.95vh));line-height:1.45">
+      <thead>
+        <tr style="text-align:left;opacity:.6">
+          <th style="padding:1.6vh .6vw;border-bottom:2px solid currentColor;font-weight:600">产品层级</th>
+          <th style="padding:1.6vh .6vw;border-bottom:2px solid currentColor;font-weight:600">代表线路</th>
+          <th style="padding:1.6vh .6vw;border-bottom:2px solid currentColor;font-weight:600">核心体验</th>
+          <th style="padding:1.6vh .6vw;border-bottom:2px solid currentColor;font-weight:600">主要人群</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">专业攀登</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">雪宝顶三峰、卫峰登山</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">5000米级雪山、冰雪技术</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">专业及进阶登山者</td></tr>
+        <tr><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">高山穿越</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">七藏沟、花海忘忧、阿尼玛东、淘尼</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">荒野、湖泊、垭口</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">进阶徒步人群</td></tr>
+        <tr><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">山脊徒步</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">云谷天脊、雪宝顶环线</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">山脊、雪山、云海</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">中高阶户外人群</td></tr>
+        <tr><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">湖泊徒步</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">土拨鼠峰、忘忧双湖、观山阅海</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">海子、草甸、花海</td><td style="padding:1.6vh .6vw;border-bottom:1px solid currentColor">大众至进阶游客</td></tr>
+        <tr><td style="padding:1.6vh .6vw">交通型户外</td><td style="padding:1.6vh .6vw">阿岭扎嘎高铁线</td><td style="padding:1.6vh .6vw">高铁直达山地</td><td style="padding:1.6vh .6vw">城市周末客群</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:2.6vh" data-anim>从短距离体验，到多日荒野穿越；从第一次走进高原，到挑战5000米级雪山，松潘正在形成完整的户外产品梯度<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项03</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 42 · 展项04 同样是线路 管法完全不同 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第四展区 · 展项04</div>
+    <div>42 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Different Rules</div>
+    <h2 class="h-xl" data-anim>同样是线路 · 管法完全不同</h2>
+    <p class="lead" style="margin-top:1.4vh" data-anim>选择三条典型线路作对比：</p>
+    <table data-anim style="width:100%;margin-top:2.6vh;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,min(1.02vw,1.95vh));line-height:1.45">
+      <thead>
+        <tr style="text-align:left;opacity:.6">
+          <th style="padding:1.4vh .6vw;border-bottom:2px solid currentColor;font-weight:600">项目</th>
+          <th style="padding:1.4vh .6vw;border-bottom:2px solid currentColor;font-weight:600">忘忧·双湖</th>
+          <th style="padding:1.4vh .6vw;border-bottom:2px solid currentColor;font-weight:600">七藏沟</th>
+          <th style="padding:1.4vh .6vw;border-bottom:2px solid currentColor;font-weight:600">雪宝顶三峰</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor;opacity:.7">产品类型</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">轻徒步</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">多日穿越</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">专业登山</td></tr>
+        <tr><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor;opacity:.7">距离/形态</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">约8km</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">约48km</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">高山攀登</td></tr>
+        <tr><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor;opacity:.7">典型海拔</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">约4376m</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">4000m级垭口</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">最高5588m</td></tr>
+        <tr><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor;opacity:.7">风险等级</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">相对较低</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">中高</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">高</td></tr>
+        <tr><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor;opacity:.7">管理重点</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">天气、通行</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">打卡、营地、失联</td><td style="padding:1.4vh .6vw;border-bottom:1px solid currentColor">资质、配比、装备、救援</td></tr>
+        <tr><td style="padding:1.4vh .6vw;opacity:.7">主要人群</td><td style="padding:1.4vh .6vw">大众/进阶</td><td style="padding:1.4vh .6vw">有高原经验人群</td><td style="padding:1.4vh .6vw">专业登山者</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:2.4vh" data-anim>线路不同，管理规则就不同。对应不同：准入条件、向导配比、承载量、打卡节点、开放季节、风险等级、救援预案<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项04</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 43 · 展项05 点一条线路 看一套治理规则 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第四展区 · 展项05</div>
+    <div>43 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Click a Route</div>
+    <h2 class="h-xl" data-anim>点一条线路 · 看一套治理规则</h2>
+    <p class="lead" style="margin-top:1.6vh; max-width:80vw" data-anim>设置交互屏。观众点击任意线路。例如：花海忘忧线。首先显示线路属性：</p>
+    <div class="grid-4" style="margin-top:2.4vh">
+      <div class="stat-card" data-anim><div class="stat-label">距离</div><div class="stat-note" style="margin-top:1vh; font-size:max(16px,1.4vw)">28.7km</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">最高海拔</div><div class="stat-note" style="margin-top:1vh; font-size:max(16px,1.4vw)">4489m</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">累计爬升</div><div class="stat-note" style="margin-top:1vh; font-size:max(16px,1.4vw)">2216m</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">类型</div><div class="stat-note" style="margin-top:1vh; font-size:max(16px,1.4vw)">高海拔穿越</div></div>
+    </div>
+    <p class="lead" style="margin-top:3vh; opacity:.86" data-anim>然后切换为：治理视角，显示：</p>
+    <div class="grid-4" style="margin-top:1.4vh">
+      <div class="stat-card" data-anim><div class="stat-note">当前开放状态 · 今日在山人数</div></div>
+      <div class="stat-card" data-anim><div class="stat-note">日最大承载量 · 向导配置</div></div>
+      <div class="stat-card" data-anim><div class="stat-note">强制打卡点 · 危险点 · 通信盲区</div></div>
+      <div class="stat-card" data-anim><div class="stat-note">天气状态 · 风险状态 · 最近救援资源</div></div>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>让观众看到：前面的制度和平台，最终全部落在一条真实线路上<div class="callout-src">Core Value</div></div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项05</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 44 · 展项06 一条线路的诞生 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>第四展区 · 展项06</div>
+    <div>44 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Birth of a Route</div>
+    <h2 class="h-xl" data-anim>一条线路如何成为一个产品</h2>
+    <p class="lead" style="margin-top:1.4vh" data-anim>一条线路的诞生：</p>
+    <div class="pipeline-section">
+      <div class="pipeline" data-cols="6">
+        <div class="step"><div class="step-nb">01</div><div class="step-title">资源发现</div></div>
+        <div class="step"><div class="step-nb">02</div><div class="step-title">实地勘测</div></div>
+        <div class="step"><div class="step-nb">03</div><div class="step-title">安全评估</div></div>
+        <div class="step"><div class="step-nb">04</div><div class="step-title">生态评估</div></div>
+        <div class="step"><div class="step-nb">05</div><div class="step-title">线路划定</div></div>
+        <div class="step"><div class="step-nb">06</div><div class="step-title">节点配置</div></div>
+      </div>
+      <div class="pipeline" data-cols="6" style="margin-top:2vh">
+        <div class="step"><div class="step-nb">07</div><div class="step-title">承载量设定</div></div>
+        <div class="step"><div class="step-nb">08</div><div class="step-title">救援体系配置</div></div>
+        <div class="step"><div class="step-nb">09</div><div class="step-title">接入平台</div></div>
+        <div class="step"><div class="step-nb">10</div><div class="step-title">正式开放</div></div>
+        <div class="step"><div class="step-nb">11</div><div class="step-title">年度复审</div></div>
+        <div class="step"><div class="step-nb">12</div><div class="step-title">动态调整</div></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:2.6vh" data-anim>线路不是画出来的，是评出来、跑出来、管出来的<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项06</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 45 · 展项07 线路持续生长 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>第四展区 · 展项07</div>
+    <div>45 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Route Growing</div>
+    <h2 class="h-xl" data-anim>线路持续生长</h2>
+    <p class="lead" style="margin-top:1.6vh" data-anim>线路投入运营后，平台持续积累：</p>
+    <div class="grid-6" style="margin-top:2.6vh">
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">游客轨迹</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">偏航数据</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">超时数据</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">气象记录</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">事故记录</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">游客评价</div></div>
+    </div>
+    <p class="lead" style="margin-top:3vh" data-anim>这些数据反向调整：</p>
+    <div class="grid-6" style="margin-top:1.4vh">
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">线路走向</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">打卡位置</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">警示设施</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">向导配比</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">开放季节</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">承载量</div></div>
+    </div>
+    <div class="callout" style="margin-top:3vh" data-anim>线路不是一成不变，而是在真实运行中不断优化<div class="callout-src">Core</div></div>
+  </div>
+  <div class="foot"><div>第四展区 · 展项07</div><div>Zone IV</div></div>
+</section>
+
+<!-- ===================== 46 · 总结区 从资源到产业 ===================== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>总结区</div>
+    <div>Summary · 46 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4.4vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>From Resources to Industry</div>
+    <h1 class="h-hero" style="font-size:7.4vw" data-anim>从资源到产业</h1>
+    <p class="lead" style="max-width:78vw" data-anim>松潘正在探索的，不只是几条徒步线路，也不只是一个智慧平台。而是一套从资源保护出发，通过制度设计、数字治理和市场化运营，将自然资源逐步转化为可识别、可管理、可运营、可持续户外产品的发展路径。</p>
+    <p class="lead" style="max-width:78vw" data-anim>最终形成覆盖：大众体验、高山徒步、荒野穿越、雪山攀登、冰雪运动、户外赛事 的全域户外产品体系。</p>
+  </div>
+  <div class="foot"><div>总结区</div><div>Summary</div></div>
+</section>
+
+<!-- ===================== 47 · 最终总收束 ===================== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>最终总收束</div>
+    <div>47 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Finale</div>
+    <h1 class="h-xl" style="font-size:5.4vw; line-height:1.2" data-anim>从一座山，到一条路<br>从一条路，到一张网<br>从一次活动，到一套治理体系</h1>
+    <p class="lead" style="margin-top:2.6vh; max-width:80vw" data-anim>松潘以资源为基础，以治理为边界，以数字为工具，以安全为底线，以生态为前提，推动全域户外产业持续发展。</p>
+    <p class="lead" style="margin-top:2vh" data-anim>最终实现：</p>
+    <div class="grid-6" style="margin-top:1.6vh">
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">资源可开放</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">线路可管理</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">主体可监管</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">活动可追踪</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">风险可预警</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">救援可协同</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">责任可追溯</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">规则可更新</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">产品可运营</div></div>
+      <div class="stat-card" data-anim><div class="stat-note" style="font-size:max(15px,1.15vw)">产业可持续</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>最终总收束</div><div>Finale</div></div>
+</section>
+
+<!-- ===================== 48 · 四个核心转场 ===================== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>四个核心转场</div>
+    <div>48 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:3.2vh; align-content:center; min-height:78vh">
+    <div class="kicker" data-anim>Four Transitions</div>
+    <div class="rowline" data-anim><div class="k">第一展区 → 第二展区</div><div class="v">好资源，需要好治理</div><div class="m">01</div></div>
+    <div class="rowline" data-anim><div class="k">第二展区 → 第三展区</div><div class="v">好制度，更需要真正执行</div><div class="m">02</div></div>
+    <div class="rowline" data-anim><div class="k">第三展区 → 第四展区</div><div class="v">好治理，最终要落在真实线路上</div><div class="m">03</div></div>
+    <div class="rowline" data-anim><div class="k">第四展区 → 总结区</div><div class="v">从一条条路，走向一个产业</div><div class="m">04</div></div>
+  </div>
+  <div class="foot"><div>转场</div><div>Transitions</div></div>
+</section>
+
+<!-- ===================== 49 · 整体参观逻辑 ===================== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>整体参观逻辑</div>
+    <div>49 / 50</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>Five Takeaways</div>
+    <h2 class="h-xl" data-anim>整体参观逻辑</h2>
+    <p class="lead" style="margin-top:1.4vh" data-anim>参观者走完整个展厅后，应形成五个清晰认知：</p>
+    <div class="grid-6" style="margin-top:3vh">
+      <div class="stat-card" data-anim><div class="stat-label">一</div><h3 class="h3-zh" style="margin-top:1vh">松潘有资源</h3><div class="stat-note" style="margin-top:1vh">而且是以雪宝顶为核心的完整高原户外资源集群。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">二</div><h3 class="h3-zh" style="margin-top:1vh">松潘有规则</h3><div class="stat-note" style="margin-top:1vh">通过“控范围、控主体、控体系”建立全域治理边界。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">三</div><h3 class="h3-zh" style="margin-top:1vh">松潘有执行工具</h3><div class="stat-note" style="margin-top:1vh">通过智慧平台，把制度变成可以执行、记录、预警和复盘的数字动作。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">四</div><h3 class="h3-zh" style="margin-top:1vh">松潘有真实产品</h3><div class="stat-note" style="margin-top:1vh">12条线路在同一套治理体系下被分级、运营和持续优化。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">五</div><h3 class="h3-zh" style="margin-top:1vh">松潘最终要形成一个产业</h3><div class="stat-note" style="margin-top:1vh">让资源保护、安全治理、平台运营、村级参与和市场发展形成长期闭环。</div></div>
+      <div class="stat-card" data-anim><div class="stat-label">Result</div><h3 class="h3-zh" style="margin-top:1vh">最终形成</h3><div class="stat-note" style="margin-top:1vh">资源有价值、开放有边界、管理有工具、产品有体系、产业有未来。</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>整体参观逻辑</div><div>Summary</div></div>
+</section>
+
+<!-- ===================== 50 · 最终形成 ===================== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>最终形成</div>
+    <div>50 / 50</div>
+  </div>
+  <div class="frame" style="display:grid; gap:4.5vh; align-content:center; min-height:80vh">
+    <div class="kicker" data-anim>Songpan Outdoor</div>
+    <h1 class="h-hero" style="font-size:6.4vw; line-height:1.18" data-anim>资源有价值 · 开放有边界<br>管理有工具 · 产品有体系<br>产业有未来</h1>
+    <div class="meta-row" data-anim>
+      <span>松潘县全域户外主题展厅</span><span>·</span><span>最终版展陈框架</span>
+    </div>
+  </div>
+  <div class="foot"><div>最终形成</div><div>— 松潘 Songpan —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 ===============
+   深色页：Holographic Dispersion（全息色散 · 钛金暗流）—— 彩虹微扰、鼠标径向涟漪
+   浅色页：Spiral Vortex（旋转涡流 · 银色珍珠）—— domain-warp 流动、无中心
+   修改风格请参考 references/webgl-backgrounds.md
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航（翻页 / 圆点 / 键盘 / 滚轮 / 触屏） ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+// 关键：矫正 deck 宽度为 total * 100vw，否则翻页会错位
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  /* 主题切换：优先读 data-theme，其次从 class（light/dark）推断 */
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  /* 动效：翻页过渡中段触发当前页的入场动画（由 motion-boot 注册） */
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（本地优先,CDN 兜底） ============
+     加载策略:先 ./assets/motion.min.js(本地,离线可用),失败 fallback 到 jsDelivr CDN
+     加载完成后挂 window.__playSlide / window.__pipeAdvance,
+     导航脚本会在翻页中段调用 __playSlide(idx),键盘/滚轮/触屏会在翻页前调用 __pipeAdvance()
+     双双失败时会兜底把所有 [data-anim] 设为可见,不让动效破坏阅读
+-->
+<script type="module">
+let motion;
+try {
+  motion = await import('./assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+    document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let pipeStep = -1;
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    if(recipe === 'pipeline'){
+      pipeStep = -1;
+      slide.querySelectorAll('[data-anim]').forEach(el=>{
+        el.style.opacity='0.15';
+        el.style.transform='none';
+      });
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'directional'){
+      const lefts  = all.filter(el=>el.dataset.anim==='left');
+      const divs   = all.filter(el=>el.dataset.anim==='divider');
+      const rights = all.filter(el=>el.dataset.anim==='right');
+      const others = all.filter(el=>!['left','right','divider'].includes(el.dataset.anim));
+      if(others.length) animate(others, {opacity:[0,1], y:[12,0]}, {duration:.6, delay:stagger(.1, {start:.15}), easing:EASE});
+      if(lefts.length)  animate(lefts,  {opacity:[0,1], x:[-24,0]}, {duration:.8, delay:.35, easing:EASE});
+      if(divs.length)   animate(divs,   {opacity:[0,.25]},          {duration:.5, delay:.9});
+      if(rights.length) animate(rights, {opacity:[0,1], x:[24,0]},  {duration:.8, delay:1.0, easing:EASE});
+      return;
+    }
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    // default: cascade
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  function pipeAdvance(){
+    if(window.__lowPowerMode) return false;
+    const slide = slides[lastIdx];
+    if(!slide || slide.dataset.animate !== 'pipeline') return false;
+    const steps  = [...slide.querySelectorAll('[data-anim="step"]')];
+    const arrows = [...slide.querySelectorAll('[data-anim="arrow"]')];
+    if(pipeStep >= steps.length - 1) return false;
+    pipeStep++;
+    animate(steps[pipeStep], {opacity:[0.15,1], y:[8,0]}, {duration:.5, easing:EASE});
+    if(pipeStep > 0 && arrows[pipeStep-1]){
+      animate(arrows[pipeStep-1], {opacity:[0.15,.7]}, {duration:.3, delay:.15});
+    }
+    return true;
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = pipeAdvance;
+
+  // 首屏:go(0) 已跑过(同步),没来得及触发动效 → 这里补一下
+  playSlide(0);
+}
+</script>
+<script>
+/* ===== 全页自动适配：内容超出可视区时整体等比缩放，避免底部被裁 ===== */
+(function(){
+  function fitSlide(sl){
+    var f = sl.querySelector('.frame'); if(!f) return;
+    f.style.transform=''; f.style.transformOrigin=''; f.style.width=''; f.style.height=''; f.style.flex=''; f.style.overflow='';
+    var cs = getComputedStyle(sl);
+    var padT = parseFloat(cs.paddingTop)||0, padB = parseFloat(cs.paddingBottom)||0;
+    var H = sl.clientHeight - padT - padB;
+    var avail = f.clientHeight;
+    var content = f.scrollHeight;
+    var s = 1;
+    if(content > avail+1){ s = avail/content; if(s<0.5) s=0.5; }
+    if(s < 0.999){
+      s = s*0.995;
+      var r = avail/H;
+      f.style.overflow='visible';
+      f.style.transformOrigin='top center';
+      f.style.transform='scale('+s.toFixed(4)+')';
+      f.style.flex='0 0 auto';
+      f.style.width='100%';
+      f.style.height=(r*100).toFixed(3)+'%';
+    }
+    sl.setAttribute('data-fit', s.toFixed(3)+'|c'+content+'|a'+avail);
+  }
+  function fitAll(){
+    var n=0;
+    document.querySelectorAll('.slide').forEach(function(sl){
+      fitSlide(sl);
+      var v=sl.getAttribute('data-fit').split('|')[0];
+      if(v!=='1.000') n++;
+    });
+    window.__fitCount=n;
+  }
+  window.__fitAll=fitAll;
+  addEventListener('DOMContentLoaded', fitAll);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(function(){ setTimeout(fitAll,30); }); }
+  addEventListener('load', function(){ setTimeout(fitAll,80); });
+  addEventListener('resize', fitAll);
+  setTimeout(fitAll,300); setTimeout(fitAll,1000); setTimeout(fitAll,2200);
+})();
+</script>
+</body>
+</html>
